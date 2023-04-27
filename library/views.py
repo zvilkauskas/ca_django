@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import Genre, Book, BookInstance, Author
+from django.views import generic
 
 
 def index(request):
@@ -17,3 +18,39 @@ def index(request):
     }
 
     return render(request, "index.html", context)
+
+def authors(request):
+    authors = Author.objects.all()
+    context = {
+        'authors': authors
+    }
+    print(authors)
+    return render(request, "authors.html", context)
+
+# Autoriaus aprašymas
+# def author(request, author_id):
+#     author = Author.objects.get(author_id)
+#     context = {
+#         'author': author
+#     }
+#     return render(request, 'author.html', context)
+
+#arba saugesnis variantas:
+
+def author(request, author_id):
+    single_author = get_object_or_404(Author, pk=author_id)
+    return render(request, 'author.html', {'author': single_author})
+
+class BookListView(generic.ListView):
+    model = Book
+    template_name = 'book_list.html'
+
+    #papildomai info po sarasu
+    def get_context_data(self, **kwargs):
+        context = super(BookListView, self).get_context_data(**kwargs)
+        context['duomenys'] = 'eilutė iš lempos'
+        return context
+
+class BookDetailView(generic.DetailView):
+    model = Book
+    template_name = 'book_detail.html'
