@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Genre, Book, BookInstance, Author
 from django.views import generic
+from django.core.paginator import Paginator
 
 
 def index(request):
@@ -20,12 +21,13 @@ def index(request):
     return render(request, "index.html", context)
 
 def authors(request):
-    authors = Author.objects.all()
+    paginator = Paginator(Author.objects.all(), 2)
+    page_number = request.GET.get('page')
+    paged_authors = paginator.get_page(page_number)
     context = {
-        'authors': authors
+        'authors': paged_authors
     }
-    print(authors)
-    return render(request, "authors.html", context)
+    return render(request, 'authors.html', context=context)
 
 # Autoriaus aprašymas
 # def author(request, author_id):
@@ -43,13 +45,14 @@ def author(request, author_id):
 
 class BookListView(generic.ListView):
     model = Book
+    paginate_by = 2
     template_name = 'book_list.html'
 
-    #papildomai info po sarasu
-    def get_context_data(self, **kwargs):
-        context = super(BookListView, self).get_context_data(**kwargs)
-        context['duomenys'] = 'eilutė iš lempos'
-        return context
+    # #papildomai info po sarasu
+    # def get_context_data(self, **kwargs):
+    #     context = super(BookListView, self).get_context_data(**kwargs)
+    #     context['duomenys'] = 'eilutė iš lempos'
+    #     return context
 
 class BookDetailView(generic.DetailView):
     model = Book
