@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from .models import Genre, Book, BookInstance, Author
 from django.views import generic
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 
 def index(request):
@@ -57,3 +58,21 @@ class BookListView(generic.ListView):
 class BookDetailView(generic.DetailView):
     model = Book
     template_name = 'book_detail.html'
+
+
+# paieška
+def search(request):
+    """
+    paprasta paieška.
+    query ima informaciją iš paieškos laukelio,
+    search_results prafiltruoja pagal įvestą tekstą knygų pavadinimus ir aprašymus.
+    Icontains nuo contains skiriasi tuo, kad icontains ignoruoja ar raidės
+    didžiosios/mažosios.
+    """
+    #query ima informaciją iš paieškos laukelio
+    query = request.GET.get('query')
+    #search_results prafiltruoja pagal įvestą tekstą knygų pavadinimus ir aprašymus.
+    #Icontains nuo contains skiriasi tuo, kad icontains ignoruoja ar raidės didžiosios/mažosios.
+    #title ir description Dpavadinimai ateina iš models.py Book klasės. Galima sudėti net ir visus.
+    search_results = Book.objects.filter(Q(title__icontains=query) | Q(description__icontains=query) | Q(author__first_name__icontains=query))
+    return render(request, 'search.html', {'books': search_results, 'query': query})
