@@ -131,3 +131,6 @@ dmypy.json
 
 # TESTING files
 amazingtest.py
+
+#media files
+*media
