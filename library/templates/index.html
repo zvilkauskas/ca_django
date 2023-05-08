@@ -1,9 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% if user.is_authenticated %}
+ <p>Sveiki {{user.username}}! </p>
+{% else %}
 
     <h1>Rajono biblioteka</h1>
     <p>Sveiki atvykę į knygų rojų!</p>
+{% endif %}
     <p>Šiuo metu turime:</p>
     <ul>
         <li><strong>Knygų:</strong> {{ books }}</li>
@@ -11,5 +15,6 @@
         <li><strong>Laisvų egzempliorių:</strong> {{ authors }}</li>
         <li><strong>Autorių:</strong> {{ available }}</li>
     </ul>
+<p>You have visited this site {{ number_of_visits }} times!</p>
 
 {% endblock %}
