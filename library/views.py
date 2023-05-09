@@ -3,6 +3,10 @@ from .models import Genre, Book, BookInstance, Author
 from django.views import generic
 from django.core.paginator import Paginator
 from django.db.models import Q
+# su class
+from django.contrib.auth.mixins import LoginRequiredMixin
+# su def
+from django.contrib.auth.decorators import login_required
 
 
 def index(request):
@@ -25,6 +29,7 @@ def index(request):
 
     return render(request, "index.html", context)
 
+
 def authors(request):
     paginator = Paginator(Author.objects.all(), 2)
     page_number = request.GET.get('page')
@@ -34,6 +39,7 @@ def authors(request):
     }
     return render(request, 'authors.html', context=context)
 
+
 # Autoriaus aprašymas
 # def author(request, author_id):
 #     author = Author.objects.get(author_id)
@@ -42,11 +48,12 @@ def authors(request):
 #     }
 #     return render(request, 'author.html', context)
 
-#arba saugesnis variantas:
+# arba saugesnis variantas:
 
 def author(request, author_id):
     single_author = get_object_or_404(Author, pk=author_id)
     return render(request, 'author.html', {'author': single_author})
+
 
 class BookListView(generic.ListView):
     model = Book
@@ -58,6 +65,7 @@ class BookListView(generic.ListView):
     #     context = super(BookListView, self).get_context_data(**kwargs)
     #     context['duomenys'] = 'eilutė iš lempos'
     #     return context
+
 
 class BookDetailView(generic.DetailView):
     model = Book
@@ -73,10 +81,40 @@ def search(request):
     Icontains nuo contains skiriasi tuo, kad icontains ignoruoja ar raidės
     didžiosios/mažosios.
     """
-    #query ima informaciją iš paieškos laukelio
+    # query ima informaciją iš paieškos laukelio
     query = request.GET.get('query')
-    #search_results prafiltruoja pagal įvestą tekstą knygų pavadinimus ir aprašymus.
-    #Icontains nuo contains skiriasi tuo, kad icontains ignoruoja ar raidės didžiosios/mažosios.
-    #title ir description Dpavadinimai ateina iš models.py Book klasės. Galima sudėti net ir visus.
-    search_results = Book.objects.filter(Q(title__icontains=query) | Q(description__icontains=query) | Q(author__first_name__icontains=query))
+    # search_results prafiltruoja pagal įvestą tekstą knygų pavadinimus ir aprašymus.
+    # Icontains nuo contains skiriasi tuo, kad icontains ignoruoja ar raidės didžiosios/mažosios.
+    # title ir description Dpavadinimai ateina iš models.py Book klasės. Galima sudėti net ir visus.
+    search_results = Book.objects.filter(
+        Q(title__icontains=query) | Q(description__icontains=query) | Q(author__first_name__icontains=query))
     return render(request, 'search.html', {'books': search_results, 'query': query})
+
+
+# ________________USER BOOK VIEWS________________
+
+# galimi du variantai su class ir def
+# variantas su class
+class UserBooksListView(LoginRequiredMixin, generic.ListView):
+    model = BookInstance
+    template_name = 'user_books.html'
+    paginate_by = 2
+
+    def get_queryset(self):
+        return BookInstance.objects.filter(reader=self.request.user, book_status__exact='t').order_by('due_back')
+
+
+#variantas su def
+@login_required(login_url='login')
+def user_books(request):
+    user = request.user
+    try:
+        user_books = BookInstance.objects.filter(reader=request.user).filter(book_status__exact='t').order_by('due_back')
+    except BookInstance.DoesNotExist:
+        user_books = None
+
+    context = {
+        'user': user,
+        'user_books': user_books,
+    }
+    return render(request, 'user_books2.html', context)
