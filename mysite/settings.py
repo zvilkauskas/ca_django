@@ -139,9 +139,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'library/static/media')
 
 
 # galima pakeist su ?next=
-# LOGIN_REDIRECT_URL = '/'
 # LOGOUT_REDIRECT_URL = '/library/account/login'
 
+LOGIN_REDIRECT_URL = '/'
 # password reset
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
