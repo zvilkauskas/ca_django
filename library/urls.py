@@ -13,5 +13,6 @@ urlpatterns = [
     path('my_books/', views.UserBooksListView.as_view(), name='my-books'),
     #su def
     path('my_books2/', views.user_books, name='my-books2'),
+    path('register/', views.register, name='register'),
 
 ]

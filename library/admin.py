@@ -21,7 +21,7 @@ class BookInstanceAdmin(admin.ModelAdmin):
         return obj.due_back.strftime('%Y-%m-%d')
 
     list_display = ('book', 'book_status', 'available_on', 'reader')
-    # jeigu vienas elementas tuplo viduje, butinai reikia gale , pvz: ('book_status',)
+    # jeigu vienas elementas tuple'o viduje, butinai reikia gale , pvz: ('book_status',)
     list_filter = ('book_status', 'due_back')
     fieldsets = (
         ('General', {'fields': ('instance_id', 'book')}),
