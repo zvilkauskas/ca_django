@@ -13,6 +13,11 @@ from django.contrib.auth.forms import User
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 
+# Forms imports
+from django.shortcuts import render, reverse, get_object_or_404
+from .forms import BookReviewForm
+# Importuojame FormMixin, kurį naudosime BookDetailView klasėje
+from django.views.generic.edit import FormMixin
 
 def index(request):
     book_count = Book.objects.all().count()
@@ -72,9 +77,32 @@ class BookListView(generic.ListView):
     #     return context
 
 
-class BookDetailView(generic.DetailView):
+class BookDetailView(FormMixin, generic.DetailView):
     model = Book
     template_name = 'book_detail.html'
+    form_class = BookReviewForm
+
+    # nurodome, kur atsidursime komentaro sėkmės atveju.
+    def get_success_url(self):
+        return reverse('book-detail', kwargs={'pk': self.object.book_id})
+
+    # standartinis post metodo perrašymas, naudojant FormMixin, galite kopijuoti tiesiai į savo projektą.
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    # štai čia nurodome, kad knyga bus būtent ta, po kuria komentuojame, o vartotojas bus tas, kuris yra prisijungęs.
+    def form_valid(self, form):
+        form.instance.book = self.object
+        form.instance.reviewer = self.request.user
+        form.save()
+        return super(BookDetailView, self).form_valid(form)
+
+
 
 
 # paieška
@@ -130,6 +158,8 @@ def register(request):
     if request.method == "POST":
         # pasiimame reikšmes iš registracijos formos
         username = request.POST['username']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
         email = request.POST['email']
         password = request.POST['password']
         password2 = request.POST['password2']
@@ -146,13 +176,13 @@ def register(request):
                     return redirect('register')
                 else:
                     # jeigu viskas tvarkoje, sukuriame naują vartotoją
-                    User.objects.create_user(username=username, email=email, password=password)
+                    User.objects.create_user(username=username, email=email, password=password, first_name=first_name, last_name=last_name)
                     messages.info(request, f'Vartotojas {username} užregistruotas!')
                     return redirect('login')
         else:
             messages.error(request, 'Slaptažodžiai nesutampa!')
             return redirect('register')
-    return render(request, 'register.html')
+    return render(request, 'registration/register.html')
 
 
 # Sutrumpintas destytojo variantas
@@ -171,3 +201,4 @@ def register(request):
 #     User.objects.create_user(username=username, email=email, password=password)
 #     messages.info(request, f'Vartotojas {username} užregistruotas!')
 #     return redirect('login')
+

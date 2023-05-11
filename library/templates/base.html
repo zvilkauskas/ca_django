@@ -18,28 +18,40 @@
                 <div class="col-sm-2">
                     {% block sidebar %}
                         <ul class="sidebar-nav">
-                            {% if user.is_authenticated %}
-                                <li><a href="{% url 'index' %}">Pradžia</a></li>
-                                <li><a href="{% url 'books' %}">Visos knygos</a></li>
-                                <li><a href="{% url 'authors' %}">Visi autoriai</a></li>
-                                <li><a href="{% url 'my-books' %}">Mano paimtos knygos</a></li>
-                                <li><a href="{% url 'my-books2' %}">Mano paimtos knygos2</a></li>
-                                <li>
-                                    <form action="{% url 'search' %}" method="get" class="form-inline my-2 my-md-0">
-                                        <input name="query" class="form-control" type="text" placeholder="Paieška">
-                                    </form>
-                                </li>
-                                <li><a href="{% url 'logout' %}?next=/library">Logout</a></li>
-                            {% else %}
-                                <li><a href="{% url 'login' %}?next={{request.path}}">Login</a></li>
-                                {% if not user.is_authenticated %}
+                            <li>
+                                <form action="{% url 'search' %}" method="get" class="form-inline my-2 my-md-0">
+                                    <input name="query" class="form-control" type="text" placeholder="Paieška">
+                                </form>
+                                <style>
+                                    navBarSearchForm input[type=text]{width:430px !important;}
+                                </style>
+
+                            </li>
+                            <h6>{{ user.first_name }} {{ user.last_name}}</h6>
+                            <li><a href="{% url 'index' %}">Pradžia</a></li>
+                            <li><a href="{% url 'books' %}">Visos knygos</a></li>
+                            <li><a href="{% url 'authors' %}">Visi autoriai</a></li>
+                                {% if user.is_authenticated %}
+                                    <li><a href="{% url 'my-books' %}">Mano paimtos knygos</a></li>
+                                    <li><a href="{% url 'my-books2' %}">Mano paimtos knygos2</a></li>
+
+                                    <li><a href="{% url 'logout' %}?next=/library">Atsijungti</a></li>
+                                {% else %}
+                                    <li><a href="{% url 'login' %}?next={{request.path}}">Prisijungti</a></li>
                                     <li> <a href="{% url 'register'%}">Registruotis</a></li>
                                 {% endif %}
-                            {% endif %}
                         </ul>
                     {% endblock %}
                 </div>
                 <div class="col-sm-10 ">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'info' %}success{% endif %}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
                     {% block content %}
 
                     {% endblock %}
