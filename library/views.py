@@ -22,6 +22,9 @@ from django.views.generic.edit import FormMixin
 #user profile pics imports
 from django.contrib.auth.decorators import login_required
 
+# form edit imports
+from .forms import BookReviewForm, UserUpdateForm, ProfileUpdateForm
+
 def index(request):
     book_count = Book.objects.all().count()
     book_instance_count = BookInstance.objects.all().count()
@@ -208,5 +211,23 @@ def register(request):
 # user profile
 @login_required
 def profile(request):
-    return render(request, 'profile.html')
+    if request.method == "POST":
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, f"Profilis atnaujintas")
+            return redirect('profile')
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=request.user.profile)
+
+    context = {
+        'u_form': u_form,
+        'p_form': p_form,
+    }
+    return render(request, 'profile.html', context)
+
+
 
