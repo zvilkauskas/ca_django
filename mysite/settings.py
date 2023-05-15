@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     # MY APPS
     'library',
     'tinymce',
+    #'library.apps.LibraryConfig',
     # DEFAULT APPS
     'django.contrib.admin',
     'django.contrib.auth',

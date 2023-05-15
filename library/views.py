@@ -19,6 +19,9 @@ from .forms import BookReviewForm
 # Importuojame FormMixin, kurį naudosime BookDetailView klasėje
 from django.views.generic.edit import FormMixin
 
+#user profile pics imports
+from django.contrib.auth.decorators import login_required
+
 def index(request):
     book_count = Book.objects.all().count()
     book_instance_count = BookInstance.objects.all().count()
@@ -201,4 +204,9 @@ def register(request):
 #     User.objects.create_user(username=username, email=email, password=password)
 #     messages.info(request, f'Vartotojas {username} užregistruotas!')
 #     return redirect('login')
+
+# user profile
+@login_required
+def profile(request):
+    return render(request, 'profile.html')
 

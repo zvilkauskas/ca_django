@@ -72,8 +72,9 @@ class BookInstance(models.Model):
     @property
     def is_overdue(self):
         if date.today() > self.due_back:
-            return  True
+            return True
         return False
+
     class Meta:
         ordering = ['due_back']
 
@@ -93,4 +94,9 @@ class BookReview(models.Model):
         ordering = ['-date_created']
 
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    photo = models.ImageField(default="profile_pics/default.jpg", upload_to="profile_pics")
 
+    def __str__(self):
+        return f"{self.user.username} profile"
