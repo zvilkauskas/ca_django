@@ -4,7 +4,7 @@ from django.views import generic
 from django.core.paginator import Paginator
 from django.db.models import Q
 # su class
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 # su def
 from django.contrib.auth.decorators import login_required
 # Registration imports
@@ -15,7 +15,7 @@ from django.contrib import messages
 
 # Forms imports
 from django.shortcuts import render, reverse, get_object_or_404
-from .forms import BookReviewForm
+from .forms import BookReviewForm, CreateBookInstanceForm
 # Importuojame FormMixin, kurį naudosime BookDetailView klasėje
 from django.views.generic.edit import FormMixin
 
@@ -24,6 +24,7 @@ from django.contrib.auth.decorators import login_required
 
 # form edit imports
 from .forms import BookReviewForm, UserUpdateForm, ProfileUpdateForm
+
 
 def index(request):
     book_count = Book.objects.all().count()
@@ -134,16 +135,18 @@ def search(request):
 
 # galimi du variantai su class ir def
 # variantas su class
+#Mano paimtos knygos
 class UserBooksListView(LoginRequiredMixin, generic.ListView):
     model = BookInstance
     template_name = 'user_books.html'
-    paginate_by = 2
+    paginate_by = 20
 
     def get_queryset(self):
         return BookInstance.objects.filter(reader=self.request.user, book_status__exact='t').order_by('due_back')
 
 
 #variantas su def
+#Mano paimtos knygos2
 @login_required(login_url='login')
 def user_books(request):
     user = request.user
@@ -157,6 +160,94 @@ def user_books(request):
         'user_books': user_books,
     }
     return render(request, 'user_books2.html', context)
+#------------------------------------DETAIL VIEW------------------------------------
+#su class
+class UserBookDetailView(LoginRequiredMixin, generic.DetailView):
+    model = BookInstance
+    template_name = 'user_book.html'
+
+# su def
+@login_required(login_url='login')
+def user_book(request, book_instance_id):
+    user = request.user
+    try:
+        user_taken_book = BookInstance.objects.get(instance_id=book_instance_id)
+    except BookInstance.DoesNotExist:
+        user_taken_book = None
+
+    context = {
+        'user_taken_book': user_taken_book
+    }
+    return render(request, 'user_book2.html', context)
+#CREATE
+#------------------------------------LIST VIEW------------------------------------
+class UserBookCreateView(LoginRequiredMixin, generic.CreateView):
+    model = BookInstance
+    template_name = 'create_new_book_instance.html'
+    fields = ['book', 'due_back']
+    success_url = '/library/my_books/'
+
+    def form_valid(self, form):
+        form.instance.reader = self.request.user
+        form.instance.book_status = 't'
+        return super().form_valid(form)
+
+# def
+def create_new_book_instance(request):
+    """
+    1. reikalinga forma su fieldais, kuriuos norim editint
+    2. pries darant save form mums reikia idet useri (required nes yra FK)
+    3. Urls/template analogiskai kaip sitie tik +2 (create2)
+    4. Pasiziuret get_or_create metoda prie to pacio (kai darai per query) sito nereiks cia
+    :param request:
+    :return:
+    """
+    # if request.method == 'POST':
+    #     form = CreateBookInstanceForm(data=request.POST)
+    #     if form.is_valid:
+    #         add_user = form.save(False)
+    #         add_user.reader = request.user
+    #         add_user.save()
+    # else:
+    #     form = CreateBookInstanceForm()
+    # context = {
+    #     'form': form
+    # }
+    # return render(request, 'some.html', context)
+    pass
+
+#UPDATE
+#------------------------------------UPDATE VIEW------------------------------------
+class UserBookUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
+    model = BookInstance
+    template_name = 'update_book_instance.html'
+    fields = ['book', 'due_back', 'book_status']
+    success_url = '/library/my_books/'
+
+    def form_valid(self, form):
+        form.instance.reader = self.request.user
+        return super().form_valid(form)
+
+    def test_func(self):
+        book_instance = self.get_object()
+        return self.request.user == book_instance.reader
+
+def update_book_instance(request, pk):
+    pass
+
+#DELETE
+#------------------------------------DELETE VIEW------------------------------------
+class UserBookDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
+    model = BookInstance
+    success_url = '/library/my_books/'
+    template_name = 'delete_book_instance.html'
+
+    def test_func(self):
+        book_instance = self.get_object()
+        return self.request.user == book_instance.reader
+
+def delete_book_instance(request, pk):
+    pass
 
 # Registration function
 @csrf_protect
@@ -228,6 +319,8 @@ def profile(request):
         'p_form': p_form,
     }
     return render(request, 'profile.html', context)
+
+#-----------------------------CRUD-----------------------------
 
 
 

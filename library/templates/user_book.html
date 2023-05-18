@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Mano paimta knyga:</h1>
+    <hr>
+        <ul>
+        <img class="rounded-circle" src="{{object.reader.profile.photo.url}}">
+        <li><strong class="{% if object.is_overdue %}text-danger{% endif %}">Pavadinimas: {{object.book.title}}</strong></li>
+        <ul><strong>Grąžinimo terminas:</strong> {{object.due_back}}</ul>
+        <br/>
+      </li>
+    </ul>
+    {% if user == object.reader %}
+        <div>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'update' object.pk %}">Redaguoti</a>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'delete' object.pk %}">Trinti</a>
+        </div>
+    {% endif %}
+{% endblock %}
