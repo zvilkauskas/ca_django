@@ -10,4 +10,10 @@
         <br/>
       </li>
     </ul>
+    {% if user == user_taken_book.reader %}
+        <div>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'update2' user_taken_book.pk %}">Redaguoti</a>
+
+        </div>
+    {% endif %}
 {% endblock %}

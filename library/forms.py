@@ -61,3 +61,13 @@ class CreateBookInstanceForm(forms.ModelForm):
     class Meta:
         model = BookInstance
         fields = ['book', 'due_back']
+
+
+class EditBookInstanceForm(forms.ModelForm):
+    class Meta:
+        model = BookInstance
+        fields = ['book', 'due_back', 'book_status']
+
+        widgets = {
+            'book': forms.HiddenInput,
+        }
