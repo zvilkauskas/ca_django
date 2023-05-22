@@ -24,6 +24,10 @@ urlpatterns = [
     path('my_books/update/<uuid:pk>', views.UserBookUpdateView.as_view(), name='update'),
     # DeleteView su class
     path('my_books/delete/<uuid:pk>', views.UserBookDeleteView.as_view(), name='delete'),
+    # CreateView su def
+    path('my_books/create2', views.create_new_book_instance, name='create2'),
+    # UpdateView su def
+    path('my_books/update2/<uuid:pk>', views.update_book_instance, name='update2'),
     #Login and profile
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),

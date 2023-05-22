@@ -23,7 +23,7 @@ from django.views.generic.edit import FormMixin
 from django.contrib.auth.decorators import login_required
 
 # form edit imports
-from .forms import BookReviewForm, UserUpdateForm, ProfileUpdateForm
+from .forms import BookReviewForm, UserUpdateForm, ProfileUpdateForm, EditBookInstanceForm
 
 
 def index(request):
@@ -193,6 +193,7 @@ class UserBookCreateView(LoginRequiredMixin, generic.CreateView):
         return super().form_valid(form)
 
 # def
+@login_required(login_url='login')
 def create_new_book_instance(request):
     """
     1. reikalinga forma su fieldais, kuriuos norim editint
@@ -202,19 +203,22 @@ def create_new_book_instance(request):
     :param request:
     :return:
     """
-    # if request.method == 'POST':
-    #     form = CreateBookInstanceForm(data=request.POST)
-    #     if form.is_valid:
-    #         add_user = form.save(False)
-    #         add_user.reader = request.user
-    #         add_user.save()
-    # else:
-    #     form = CreateBookInstanceForm()
-    # context = {
-    #     'form': form
-    # }
-    # return render(request, 'some.html', context)
-    pass
+    if request.method == 'POST':
+        form = CreateBookInstanceForm(data=request.POST)
+        if form.is_valid:
+            add_user = form.save(False)
+            add_user.reader = request.user
+            add_user.book_status = 't'
+            add_user.save()
+            # dalykas, kuris filtruoja pagal paskutini irasa, jeigu kas nors tuo metu daro ta pati
+            # newly_created_object = BookInstance.object.filter(added_by=request.user).latest('book_instance_id')
+            return redirect('/')
+    else:
+        form = CreateBookInstanceForm()
+    context = {
+        'form': form
+    }
+    return render(request, 'create_new_book_instance_2.html', context)
 
 #UPDATE
 #------------------------------------UPDATE VIEW------------------------------------
@@ -231,9 +235,24 @@ class UserBookUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.Update
     def test_func(self):
         book_instance = self.get_object()
         return self.request.user == book_instance.reader
-
+@login_required(login_url='login')
 def update_book_instance(request, pk):
-    pass
+    book_instance = BookInstance.objects.get(instance_id=pk)
+    if request.method == 'POST':
+        form = EditBookInstanceForm(data=request.POST, instance=book_instance)
+        if form.is_valid():
+            change_form = form.save(False)
+            change_form.reader = book_instance.reader
+            change_form.save()
+            return redirect(f'/library/my_books2/{pk}')
+    else:
+        form = EditBookInstanceForm(instance=book_instance)
+
+    context = {
+        'form': form,
+    }
+    return render(request, 'update_book_instance_2.html', context)
+
 
 #DELETE
 #------------------------------------DELETE VIEW------------------------------------
