@@ -24,6 +24,7 @@ class ProfileUpdateForm(forms.ModelForm):
         model = Profile
         fields = ['photo']
 
+
 #   PVZ SU FORMOM
 # class AddAuthorForm(forms.ModelForm):
 #     class Meta:
@@ -62,6 +63,9 @@ class CreateBookInstanceForm(forms.ModelForm):
         model = BookInstance
         fields = ['book', 'due_back']
 
+        widgets = {
+            'due_back': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
+        }
 
 class EditBookInstanceForm(forms.ModelForm):
     class Meta:

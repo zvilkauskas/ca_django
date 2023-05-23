@@ -28,6 +28,8 @@ urlpatterns = [
     path('my_books/create2', views.create_new_book_instance, name='create2'),
     # UpdateView su def
     path('my_books/update2/<uuid:pk>', views.update_book_instance, name='update2'),
+    # DeleteView su def
+    path('my_books/delete2/<uuid:pk>', views.delete_book_instance, name='delete2'),
     #Login and profile
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
